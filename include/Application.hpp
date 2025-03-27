@@ -27,4 +27,5 @@ private:
 
     btRigidBody*                m_ground = nullptr;
     Model                       m_cubeModel;
+    Texture2D                   m_texture_dark;
 };

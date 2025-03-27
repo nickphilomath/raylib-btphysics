@@ -34,6 +34,9 @@ Application::Application() {
 
     // Load Cube Model
     m_cubeModel = LoadModel("resources/models/cube.obj");
+    // load textures
+    m_texture_dark = LoadTexture("resources/textures/kenney_prototype-textures/PNG/Orange/texture_08.png");
+    m_cubeModel.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = m_texture_dark;
 }
 
 Application::~Application() {
@@ -97,12 +100,12 @@ void Application::drawCube(btRigidBody *cube)
     // std::cout << "cube position: " << cubePos.x() << " " << cubePos.y() << " " << cubePos.z() << std::endl;
 
     // Draw the transformed model
-    DrawModel(m_cubeModel, {0, 0, 0}, 1.0f, GREEN);
-    DrawModelWires(m_cubeModel, {0, 0, 0}, 1.0f, RED);
+    DrawModel(m_cubeModel, {0, 0, 0}, 1.0f, WHITE);
+    // DrawModelWires(m_cubeModel, {0, 0, 0}, 1.0f, RED);
 }
 
 void Application::run() {
-    SetTargetFPS(60);
+    // SetTargetFPS(60);
     DisableCursor();
 
     int count = 0;
@@ -110,17 +113,51 @@ void Application::run() {
     // create cubes
     createCube(0, 10, 0, 1, 1);
     count++;
+    bool spawnStopped = false;
+
+    btCollisionShape* ballShape = new btSphereShape(3);
+    btDefaultMotionState* ballMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 5, 0)));
+    btRigidBody::btRigidBodyConstructionInfo ballRigidBodyCI(1, ballMotionState, ballShape, btVector3(0, 0, 0));
+    btRigidBody* ballRigidBody = new btRigidBody(ballRigidBodyCI);
+    m_world->addRigidBody(ballRigidBody);
+
 
     while (!WindowShouldClose()) {
         // Update
         UpdateCamera(&m_camera, CAMERA_FREE);
 
-        // if (IsKeyPressed('R')) {
-            createCube(0, 10, 0, 1, 1);
+        Vector3 cameraPos = { m_camera.position.x, m_camera.position.y, m_camera.position.z };
+        btTransform ballTransform;
+        ballTransform.setIdentity();
+        ballTransform.setOrigin(btVector3(cameraPos.x, cameraPos.y, cameraPos.z));
+        ballRigidBody->setWorldTransform(ballTransform);
+        ballRigidBody->getMotionState()->setWorldTransform(ballTransform);
+
+        if (IsKeyPressed('R')) {spawnStopped = false; count = 0;}
+        if (count < 300 && !spawnStopped) {
+            createCube(0, 20, 0, 1, 1);
             count++;
-        // }
+        } else spawnStopped = true;
 
         m_world->stepSimulation(GetFrameTime(), 10);
+
+        // Remove cubes that fall below -100
+        for (auto it = m_rigidBodies.begin(); it != m_rigidBodies.end(); ) {
+            btTransform transform;
+            (*it)->getMotionState()->getWorldTransform(transform);
+            btVector3 pos = transform.getOrigin();
+
+            if (pos.y() < -100) {
+                m_world->removeRigidBody(*it);
+                delete (*it)->getMotionState();
+                delete (*it)->getCollisionShape();
+                delete *it;
+                it = m_rigidBodies.erase(it);
+                count--;
+            } else {
+                ++it;
+            }
+        }
 
         // Render
         BeginDrawing();
