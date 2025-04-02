@@ -19,8 +19,9 @@ Application::Application() {
     m_camera.projection = CAMERA_PERSPECTIVE;
 
     // load textures
-    m_texture_orange = LoadTexture("resources/textures/kenney_prototype-textures/PNG/Orange/texture_08.png");
-    m_texture_dark   = LoadTexture("resources/textures/kenney_prototype-textures/PNG/Dark/texture_07.png");
+    m_texture_orange = LoadTexture("resources/textures/kenney_prototype-textures/PNG/Orange/texture_10.png");
+    m_texture_dark   = LoadTexture("resources/textures/kenney_prototype-textures/PNG/Dark/texture_08.png");
+    Texture2D texture_purple = LoadTexture("resources/textures/kenney_prototype-textures/PNG/Purple/texture_10.png");
     SetTextureWrap(m_texture_dark, TEXTURE_WRAP_REPEAT);
     
     // Set up Bullet Physics world
