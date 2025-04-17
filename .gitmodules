@@ -1,0 +1,6 @@
+[submodule "vendor/bullet3"]
+	path = vendor/bullet3
+	url = https://github.com/bulletphysics/bullet3
+[submodule "vendor/raylib"]
+	path = vendor/raylib
+	url = https://github.com/raysan5/raylib
